@@ -1,16 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from IPython.display import HTML
 
 # -------------------------
 # 1. Physical Parameters
 # -------------------------
 L = 1.0         # Distance between the two mirrors
 v = 0.6         # Speed of the moving clock (fraction of c)
-c = 1.0         # Speed of light (set to 1 for simplicity)
+c = 1.0         # Speed of light
 gamma = 1 / np.sqrt(1 - v**2)
 
-T0 = 2 * L            # Period of the stationary clock
+T0 = 2 * L            # Stationary clock period
 T_moving = 2 * gamma * L
 
 T_up_stationary = L
@@ -23,8 +24,8 @@ x0_moving = 5.0
 # -------------------------
 # 2. Animation Parameters
 # -------------------------
-t_max = 10.0  # total simulation time (s)
-dt = 0.02     # time step (s)
+t_max = 10.0
+dt = 0.02
 n_frames = int(t_max / dt)
 
 # -------------------------
@@ -42,9 +43,9 @@ ax.set_title("Relativistic Light Clock Demonstration")
 # 4. Plot the Stationary Clock
 # -------------------------
 stationary_clock_x = 2
-ax.plot([stationary_clock_x, stationary_clock_x], [0, L],
-        color='blue', lw=2, label="Stationary Clock")
-# Blue photon path and marker
+ax.plot([stationary_clock_x, stationary_clock_x], [0, L], color='blue', lw=2, label="Stationary Clock")
+
+# Photon path (blue)
 stationary_path, = ax.plot([], [], color='blue', lw=1)
 stationary_marker, = ax.plot([], [], 'o', color='blue', markersize=6)
 
@@ -55,10 +56,10 @@ moving_clock_line, = ax.plot([], [], color='red', lw=2, label="Moving Clock")
 moving_path, = ax.plot([], [], color='red', lw=1)
 moving_marker, = ax.plot([], [], 'o', color='red', markersize=6)
 
-# Time display text
+# Time text
 time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
 
-# Lists for storing photon paths (for trails)
+# Lists for photon trails
 xdata_s, ydata_s = [], []
 xdata_m, ydata_m = [], []
 
@@ -68,23 +69,24 @@ xdata_m, ydata_m = [], []
 def stationary_photon_position(t):
     phase = t % T0
     if phase < T_up_stationary:
-        y = phase  # Photon going up
+        y = phase  # going up
     else:
-        y = 2 * L - phase  # Photon coming down
+        y = 2 * L - phase  # going down
     return stationary_clock_x, y
 
 def moving_photon_position(t):
-    # Determine which cycle we're in for the moving clock
+    # Determine the cycle of the moving clock
     cycle_index = int(t // T_moving)
     cycle_start_time = cycle_index * T_moving
     phase = t - cycle_start_time
-
-    # Horizontal position: mirrors move at constant speed v
-    x = x0_moving + v * t
+    
+    # Horizontal position (same as mirrors)
+    x = x0_moving + v * t  
     if phase < T_up_moving:
-        # Photon going up in the clock's rest frame (vertical component scaled by 1/gamma)
+        # going up
         y = (1 / gamma) * phase
     else:
+        # going down
         time_in_down = phase - T_up_moving
         y = L - (1 / gamma) * time_in_down
     return x, y
@@ -118,14 +120,14 @@ def init():
 def update(frame):
     t = frame * dt
     
-    # Update stationary photon position
+    # Stationary photon update
     x_s, y_s = stationary_photon_position(t)
     xdata_s.append(x_s)
     ydata_s.append(y_s)
     stationary_path.set_data(xdata_s, ydata_s)
     stationary_marker.set_data([x_s], [y_s])
     
-    # Update moving photon position
+    # Moving photon update
     x_m, y_m = moving_photon_position(t)
     xdata_m.append(x_m)
     ydata_m.append(y_m)
@@ -151,27 +153,9 @@ ani = FuncAnimation(fig, update, frames=n_frames, init_func=init,
 
 plt.legend(loc="upper right")
 
-# -------------------------
-# 10. Generate and Save HTML Page
-# -------------------------
-# Convert the animation to a JavaScript HTML representation.
-html_str = ani.to_jshtml()
+# Display the animation as HTML (removing plt.close() to avoid errors in Colab)
+HTML(ani.to_jshtml())
 
-# Wrap the animation in a complete HTML page.
-html_page = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Relativistic Light Clock Animation</title>
-</head>
-<body>
-    {html_str}
-</body>
-</html>
-"""
-
-# Write the HTML page to a file.
 with open("index.html", "w") as f:
     f.write(html_page)
 
