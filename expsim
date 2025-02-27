@@ -172,7 +172,7 @@ html_page = f"""
 """
 
 # Write the HTML page to a file.
-with open("light_clock.html", "w") as f:
+with open("index.html", "w") as f:
     f.write(html_page)
 
 print("Animation saved as 'light_clock.html'. Open this file in a web browser to view the simulation.")
